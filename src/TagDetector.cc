@@ -35,12 +35,11 @@ using namespace std;
 
 namespace AprilTags {
 
-  std::vector<TagDetection> TagDetector::extractTags(const cv::Mat& image) {
-
-    // convert to internal AprilTags image (todo: slow, change internally to OpenCV)
+  std::vector<TagDetection> TagDetector::extractTags(const cv::Mat& image)
+  {
     int width = image.cols;
     int height = image.rows;
-    AprilTags::FloatImage fimOrig(width, height);
+    FloatImage fimOrig(width, height);
     int i = 0;
     for (int y=0; y<height; y++) {
       for (int x=0; x<width; x++) {
@@ -48,6 +47,39 @@ namespace AprilTags {
         i++;
       }
     }
+    return extractTags(fimOrig);
+  }
+
+  std::vector<TagDetection> TagDetector::extractTags(const Eigen::Matrix<float, -1, -1, Eigen::RowMajor>& image)
+  {
+    int width = image.cols();
+    int height = image.rows();
+    FloatImage fimOrig(width, height);
+    int i = 0;
+    for (int y=0; y<height; y++) {
+      for (int x=0; x<width; x++) {
+        fimOrig.set(x, y, image.data()[i]/255.);
+        i++;
+      }
+    }
+    return extractTags(fimOrig);
+  }
+
+  std::vector<TagDetection> TagDetector::extractTags(const FloatImage& fimOrig) {
+
+    // convert to internal AprilTags image (todo: slow, change internally to OpenCV)
+    // int width = image.cols;
+    // int height = image.rows;
+    // FloatImage fimOrig(width, height);
+    // int i = 0;
+    // for (int y=0; y<height; y++) {
+    //   for (int x=0; x<width; x++) {
+    //     fimOrig.set(x, y, image.data[i]/255.);
+    //     i++;
+    //   }
+    // }
+    int width = fimOrig.getWidth();
+    int height = fimOrig.getHeight();
     std::pair<int,int> opticalCenter(width/2, height/2);
 
 #ifdef DEBUG_APRIL
@@ -511,7 +543,7 @@ namespace AprilTags {
       int bestRot = -1;
       float bestDist = FLT_MAX;
       for ( int i=0; i<4; i++ ) {
-	float const dist = AprilTags::MathUtil::distance2D(bottomLeft, quad.quadPoints[i]);
+	float const dist = MathUtil::distance2D(bottomLeft, quad.quadPoints[i]);
 	if ( dist < bestDist ) {
 	  bestDist = dist;
 	  bestRot = i;
