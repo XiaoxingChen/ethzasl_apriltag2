@@ -17,7 +17,7 @@ using TagCornerMat = Eigen::Matrix<float, 4, 2, Eigen::RowMajor>;
 TagCornerMat GetCorners(TagDetection& det)
 {
   TagCornerMat corners;
-  for(int i = 0; i < 3; i++)
+  for(int i = 0; i < 4; i++)
   {
     corners(i, 0) = det.p[i].first;
     corners(i, 1) = det.p[i].second;
@@ -31,8 +31,9 @@ PYBIND11_MODULE(py_ethztag,m)
 
   py::class_<AprilTags::TagDetection>(m, "TagDetection")
   .def(py::init())
-  .def_readwrite("good", &AprilTags::TagDetection::good)
+  .def_readwrite("good", &TagDetection::good)
   .def("p", &GetCorners)
+  .def_readonly("id", &TagDetection::id)
   .def("getRelativeTransform", &AprilTags::TagDetection::getRelativeTransform);
 
   py::class_<AprilTags::TagDetector>(m, "TagDetector")
