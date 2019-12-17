@@ -26,7 +26,7 @@ if __name__ == "__main__":
     
     # print(img.shape)
     results = dt.extractTags(gray)
-    print(results[0])
+    print(results[0].p())
     # cv2.imshow("123", img)
     # cv2.waitKey(0)
     
