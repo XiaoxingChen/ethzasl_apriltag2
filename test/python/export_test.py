@@ -34,7 +34,7 @@ def order_points(pts):
 
 	# return the ordered coordinates
 	return rect
-    
+
 def four_point_transform(image, pts):
 	# obtain a consistent order of the points and unpack them
 	# individually
@@ -73,6 +73,23 @@ def four_point_transform(image, pts):
 	# return the warped image
 	return warped
 
+def BoardExtraction(gray_img):
+    import py_ethztag as tag
+    dt = tag.TagDetector()
+
+    detections = dt.extractTags(gray_img)
+    print("detect {} tags".format(len(detections)))
+    det_dict = {det.id: det for det in detections}
+    board_corners = np.array([
+        [det_dict[0].p()[0, 0], det_dict[0].p()[0, 1]],
+        [det_dict[5].p()[1, 0], det_dict[5].p()[1, 1]],
+        [det_dict[35].p()[2, 0], det_dict[35].p()[2, 1]],
+        [det_dict[30].p()[3, 0], det_dict[30].p()[3, 1]]])
+
+    board_corners = PolygonScale(board_corners, 1.1)
+    board = four_point_transform(gray_img, board_corners)
+    return board 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("input img")
@@ -94,23 +111,26 @@ if __name__ == "__main__":
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
     # print(img.shape)
-    detections = dt.extractTags(gray)
-    det_dict = {det.id: det for det in detections}
-    p_outs = np.array([
-        [det_dict[0].p()[0, 0], det_dict[0].p()[0, 1]],
-        [det_dict[5].p()[1, 0], det_dict[5].p()[1, 1]],
-        [det_dict[35].p()[2, 0], det_dict[35].p()[2, 1]],
-        [det_dict[30].p()[3, 0], det_dict[30].p()[3, 1]]])
+    # detections = dt.extractTags(gray)
+    # det_dict = {det.id: det for det in detections}
+    # p_outs = np.array([
+    #     [det_dict[0].p()[0, 0], det_dict[0].p()[0, 1]],
+    #     [det_dict[5].p()[1, 0], det_dict[5].p()[1, 1]],
+    #     [det_dict[35].p()[2, 0], det_dict[35].p()[2, 1]],
+    #     [det_dict[30].p()[3, 0], det_dict[30].p()[3, 1]]])
 
-    p_outs = PolygonScale(p_outs, 1.1)
+    # print(p_outs)
+    # # quit()
 
-    p4_tf = four_point_transform(gray, p_outs)
+    # p_outs = PolygonScale(p_outs, 1.1)
+
+    # p4_tf = four_point_transform(gray, p_outs)
     # p_outs.append(p_outs[0])
     # p_outs = np.vstack([p_outs, p_outs[0]])
     
     # p_outs = np.array(p_outs)
     
-    
+    p4_tf = BoardExtraction(gray)
     # quit()
     plt.figure()
     plt.imshow(gray, 'gray')
@@ -118,7 +138,7 @@ if __name__ == "__main__":
     # plt.plot(det_dict[5].p()[1, 0], det_dict[5].p()[1, 1], 'o')
     # plt.plot(det_dict[30].p()[3, 0], det_dict[30].p()[3, 1], 'o')
     # plt.plot(det_dict[35].p()[2, 0], det_dict[35].p()[2, 1], 'o')
-    plt.plot(p_outs[:,0], p_outs[:,1], 'o-')
+    # plt.plot(p_outs[:,0], p_outs[:,1], 'o-')
     
     # print(results[0].p())
     # cv2.imshow("123", img)
